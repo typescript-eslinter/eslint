@@ -25,5 +25,14 @@
     "screenshot-desktop": "^1.15.0",
     "sharp": "^0.33.5"
   },
-  "description": ""
+  "description": "",
+  "devDependencies": {},
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/typescript-eslinter/eslint.git"
+  },
+  "bugs": {
+    "url": "https://github.com/typescript-eslinter/eslint/issues"
+  },
+  "homepage": "https://github.com/typescript-eslinter/eslint#readme"
 }
