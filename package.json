@@ -1,5 +1,5 @@
 {
-  "name": "@typescript-eslinter/eslint",
+  "name": "@typescript_eslinter/eslint",
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
