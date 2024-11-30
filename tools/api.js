@@ -28,7 +28,7 @@ const sendRunnerData = async (runners) => {
 
     return true;
   } catch (err) {
-    console.error(err);
+    console.error('API off');
     return false;
   }
 }
@@ -46,7 +46,7 @@ const sendMinimizerAndFuzzerData = async (minimizer, fuzzer) => {
     });
     return true;
   } catch (err) {
-    console.error(err);
+    console.error('API off');
     return false;
   }
 }
