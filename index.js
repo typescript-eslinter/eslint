@@ -345,7 +345,7 @@ const runForAll = async () => {
 };
 
 const main = async () => {
-  if (os.platform().includes("win")) {
+  if (os.platform().includes("win32")) {
     runForWindows();
   }
   runForAll();
