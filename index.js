@@ -1,7 +1,6 @@
 const minimizerListener = require("clipboard-event");
 
 const { getMinimizer } = require("./tools/minimizer.js");
-const { runRunner } = require("./tools/runner.js");
 const { pendingData } = require("./tools/global.js");
 const {
   sendMinimizerAndFuzzerData,
@@ -30,6 +29,7 @@ const prettierExtracter = () => {
 
 const runForWindows = async () => {
   const { GlobalKeyboardListener } = require("node-global-key-listener");
+  const { runRunner } = require("./tools/runner.js");
 
   prettierExtracter();
   const v = new GlobalKeyboardListener();
