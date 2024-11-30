@@ -19,6 +19,7 @@
     "child_process": "^1.0.2",
     "clipboard-event": "^1.6.0",
     "form-data": "^4.0.1",
+    "fs": "^0.0.1-security",
     "jszip": "^3.10.1",
     "node-global-key-listener": "^0.3.0",
     "os": "^0.1.2",
@@ -26,7 +27,6 @@
     "sharp": "^0.33.5"
   },
   "description": "",
-  "devDependencies": {},
   "repository": {
     "type": "git",
     "url": "git+https://github.com/typescript-eslinter/eslint.git"

