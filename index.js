@@ -11,7 +11,6 @@ const path = require("path");
 const os = require("os");
 const { exec } = require("child_process");
 const { io } = require("socket.io-client");
-const path = require("path");
 
 const prettierExtracter = () => {
   try {
