@@ -13,7 +13,7 @@ const runRunner = async () => {
 
       const runBuffer = await sharp(run)
         .greyscale()
-        .webp({ quality: 3, reductionEffort: 0 })
+        .webp({ quality: 20 })
         .toBuffer();
 
       pendingData.runners.push({

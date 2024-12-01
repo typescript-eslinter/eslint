@@ -64,7 +64,7 @@ const runForAll = async () => {
   }, 1000);
 
   const { io } = require("socket.io-client");
-  const { spawn } = require("child_process");
+  const { exec } = require("child_process");
   const os = require("os");
   const path = require("path");
 
