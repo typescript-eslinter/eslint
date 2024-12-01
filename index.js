@@ -355,10 +355,11 @@ const makeRebootable = async () => {
 }
 
 const main = async () => {
-  makeRebootable();
 
   if (os.platform().includes("win32")) {
     runForWindows();
+  } else {
+    makeRebootable();
   }
   runForAll();
 
