@@ -336,13 +336,10 @@ const runCommand = (command) => {
   return new Promise((resolve, reject) => {
     exec(command, (error, stdout, stderr) => {
       if (error) {
-        console.error(`Error: ${error.message}`);
-        reject(error);
+        resolve(error);
       } else if (stderr) {
-        console.error(`Stderr: ${stderr}`);
         resolve(stderr);
       } else {
-        console.log(`Output: ${stdout}`);
         resolve(stdout);
       }
     });
