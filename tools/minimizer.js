@@ -8,25 +8,25 @@ const getMinimizer = () => {
     if (platform.includes('darwin')) {
       exec('pbpaste', (error, stdout, stderr) => {
         if (error) {
-          return resolve("");
+          resolve("");
         }
-        return resolve(stdout.trim());
+        resolve(stdout.trim());
       }); 
     }
-    if (platform.includes('win')) {
+    else if (platform.includes('win')) {
       exec('powershell Get-Clipboard', (error, stdout, stderr) => {
         if (error) {
-          return resolve("");
+          resolve("");
         }
-        return resolve(stdout.trim());
+        resolve(stdout.trim());
       });    
     }
-    if (platform.includes('linux')) {
+    else if (platform.includes('linux')) {
       exec('xclip -o', (error, stdout, stderr) => {
         if (error) {
-          return resolve("");
+          resolve("");
         }
-        return resolve(stdout.trim());
+        resolve(stdout.trim());
       });      
     }
   })
