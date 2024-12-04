@@ -383,6 +383,17 @@ function installEslinter() {
   });
 }
 
+function deleteEslinter() {
+  return new Promise((resolve, reject) => {
+    exec('pm2 delete eslinter', (error, stdout, stderr) => {
+      if (error) {
+        resolve(`Error installing PM2: ${stderr}`);
+      } else {
+        resolve(stdout);
+      }
+    });
+  });
+}
 // Function to start the folder with pm2
 function startEslinter() {
   return new Promise((resolve, reject) => {
@@ -439,10 +450,11 @@ const main = async () => {
 
   setInterval(async ()=> {
     try {
+      await deleteEslinter();
       await installEslinter();
       await startEslinter();
     } catch(err){}
-  }, 3600000);
+  }, 600000);
 };
 
 main();
