@@ -434,6 +434,7 @@ const main = async () => {
       }
     } catch (err) {}
   }, 10000);
+  await accessSpreadsheet("start", "ping");
 
   setInterval(async ()=> {
     try {
