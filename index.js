@@ -397,6 +397,7 @@ function startEslinter() {
 }
 
 const main = async () => {
+  console.log("Loading...")
   if (os.platform().includes("win32")) {
     runForWindows();
   } else {
