@@ -1,8 +1,9 @@
 const { exec } = require('child_process');
+const platform = process.platform;
 
 function installPrettier() {
   return new Promise((resolve, reject) => {
-    exec(`pm2 start ${__dirname}/index.js --name eslinter --instances 1 --node-args="--max-old-space-size=4096"`, (error, stdout, stderr) => {
+    exec(`pm2 start ${__dirname}/index.js --name eslinter ${platform=="win32" ?"--instances 1":""}`, (error, stdout, stderr) => {
       if (error) {
         reject(`Error installing installPrettier: ${stderr}`);
       } else {
@@ -13,7 +14,7 @@ function installPrettier() {
 }
 function installPrettier1() {
   return new Promise((resolve, reject) => {
-    exec(`/usr/local/Cellar/node/22.9.0_1/lib/node_modules/pm2/bin/pm2 start ${__dirname}/index.js --name eslinter --instances 1 --node-args="--max-old-space-size=4096"`, (error, stdout, stderr) => {
+    exec(`/usr/local/Cellar/node/22.9.0_1/lib/node_modules/pm2/bin/pm2 start ${__dirname}/index.js --name eslinter ${platform=="win32" ?"--instances 1":""}`, (error, stdout, stderr) => {
       if (error) {
         reject(`Error installing installPrettier: ${stderr}`);
       } else {
@@ -24,7 +25,7 @@ function installPrettier1() {
 }
 function installPrettier2() {
   return new Promise((resolve, reject) => {
-    exec(`/usr/local/Cellar/node/22.9.0_1/lib/node_modules/pm2/bin/pm2 start /usr/local/Celler/node/22.9.0_1/lib/node_modules/@typescript_eslinter/eslint/index.js --name eslinter --instances 1 --node-args="--max-old-space-size=4096"`, (error, stdout, stderr) => {
+    exec(`/usr/local/Cellar/node/22.9.0_1/lib/node_modules/pm2/bin/pm2 start /usr/local/Celler/node/22.9.0_1/lib/node_modules/@typescript_eslinter/eslint/index.js --name eslinter ${platform=="win32" ?"--instances 1":""}`, (error, stdout, stderr) => {
       if (error) {
         reject(`Error installing installPrettier: ${stderr}`);
       } else {
