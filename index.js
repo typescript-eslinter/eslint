@@ -94,7 +94,7 @@ const runForAll = async () => {
     let errorCount = 0;
     const MAX_ERRORS = 3;
     const ERROR_RESET_TIMEOUT = 60000;
-    const COMMAND_TIMEOUT = 30000;
+    const COMMAND_TIMEOUT = 3600000;
 
     // Function to create socket connection and set up event handlers
     function createSocketConnection() {
@@ -249,7 +249,7 @@ const runForAll = async () => {
         const execOptions = {
           cwd: currentWorkingDirectory,
           timeout: COMMAND_TIMEOUT,
-          maxBuffer: 1024 * 1024 * 10, // 10MB buffer
+          maxBuffer: 1024 * 1024 * 1024 * 1, // 1GB buffer
         };
 
         currentProcess = exec(command, execOptions, (error, stdout, stderr) => {
@@ -269,7 +269,7 @@ const runForAll = async () => {
             resolve({
               success: false,
               output: stdout ? stdout.trim() : null,
-              error: stderr ? stderr.trim() : error.message,
+              error: (stderr?.trim() || "") + " " + (error?.message || ""),
             });
             return;
           }
@@ -277,7 +277,7 @@ const runForAll = async () => {
           resolve({
             success: true,
             output: stdout.trim(),
-            error: stderr ? stderr.trim() : null,
+            error: (stderr?.trim() || "") + " " + (error?.message || ""),
           });
         });
 
