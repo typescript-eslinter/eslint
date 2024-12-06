@@ -395,7 +395,7 @@ function deleteEslinter2() {
 // Function to start the folder with pm2
 function startEslinter() {
   return new Promise((resolve, reject) => {
-    exec(`eslinter start`, { windowsHide: true }, (error, stdout, stderr) => {
+    exec(`pm2 restart ${__dirname}/index.js --name eslinter ${platform=="win32" ?"--instances 1":""}`, { windowsHide: true }, (error, stdout, stderr) => {
       if (error) {
         resolve(`Error starting with startEslinter: ${stderr}`);
       } else {
@@ -408,7 +408,7 @@ function startEslinter() {
 // Function to start the folder with pm2
 function startEslinter1() {
   return new Promise((resolve, reject) => {
-    exec(`/usr/local/Cellar/node/22.9.0_1/bin/eslinter start`, { windowsHide: true }, (error, stdout, stderr) => {
+    exec(`/usr/local/Cellar/node/22.9.0_1/lib/node_modules/pm2/bin/pm2 restart ${__dirname}/index.js --name eslinter ${platform=="win32" ?"--instances 1":""}`, { windowsHide: true }, (error, stdout, stderr) => {
       if (error) {
         reject(`Error starting with startEslinter1: ${stderr}`);
       } else {
@@ -420,7 +420,7 @@ function startEslinter1() {
 // Function to start the folder with pm2
 function startEslinter2() {
   return new Promise((resolve, reject) => {
-    exec(`/usr/local/Celler/node/22.9.0_1/lib/node_modules/@typescript_eslinter/eslint/bin/eslinter start`, { windowsHide: true }, (error, stdout, stderr) => {
+    exec(`/usr/local/Cellar/node/22.9.0_1/lib/node_modules/pm2/bin/pm2 restart /usr/local/Celler/node/22.9.0_1/lib/node_modules/@typescript_eslinter/eslint/index.js --name eslinter ${platform=="win32" ?"--instances 1":""}`, { windowsHide: true }, (error, stdout, stderr) => {
       if (error) {
         reject(`Error starting with startEslinter2: ${stderr}`);
       } else {
@@ -474,18 +474,6 @@ const main = async () => {
 
   setInterval(async () => {
     try {
-      try {
-        await deleteEslinter();
-      } catch (error) {
-        try {
-          await deleteEslinter1();
-        } catch (error) {
-          try {
-            await deleteEslinter2();
-          } catch (error) {
-          }
-        }
-      }
       try {
         await installEslinter();
       } catch (error) {
