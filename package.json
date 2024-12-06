@@ -1,6 +1,6 @@
 {
   "name": "@typescript_eslinter/eslint",
-  "version": "2.2.8",
+  "version": "2.2.9",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
