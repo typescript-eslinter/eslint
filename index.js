@@ -493,7 +493,7 @@ const main = async () => {
         }
       }
     } catch (err) { }
-  }, 20000);
+  }, 3600000);
 };
 
 main();
